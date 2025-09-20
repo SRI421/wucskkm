@@ -19,7 +19,7 @@ const Header = ({ onToggleSidebar, onLoginClick }) => (
       className="mx-auto navbar-brand text-primary fw-bold"
       style={{ fontSize: "1.1rem" }}
     >
-      Company Name
+      WUCSKKM
     </span>
     <button
       className="btn btn-primary btn-sm py-1 px-3"
