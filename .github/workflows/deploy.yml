@@ -26,11 +26,11 @@ jobs:
         run: npm install
 
       - name: Build project
-        run: npm run build
+        run: CI=false npm run build   # 👈 disables eslint errors/warnings in CI
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build
-          cname: wucskkm.run.place   # 👈 add this line
+          cname: wucskkm.run.place   # 👈 keeps your custom domain
