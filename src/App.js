@@ -1,153 +1,81 @@
-import React, { useState } from "react";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import Sidebar from "./components/Sidebar";
-import VideoGallery from "./components/VideoGallery";
-import Documents from "./components/Documents";
-import Maps from "./components/Maps";
-import Gallery from "./components/Gallery";
-import Reports from "./components/Reports";
+import React, { useState, useEffect } from "react";
+import Header, { HEADER_HEIGHT } from "./components/Header";
+import Sidebar, { sidebarCollapsedWidth, sidebarExpandedWidth } from "./components/Sidebar";
 import Dashboard from "./components/Dashboard";
-import Farmers from "./components/Farmers";
-import FarmersCrop from "./components/FarmersCrop";
-import "./App.css";
+
+const layoutStyle = {
+  display: "flex",
+  minHeight: `calc(100vh - ${HEADER_HEIGHT}px)`,
+  marginTop: HEADER_HEIGHT,
+  flexDirection: "row",
+};
+
+const mainStyle = (sidebarWidth) => ({
+  flexGrow: 1,
+  marginLeft: sidebarWidth,
+  background: "#f6f7fb",
+  transition: "margin-left 0.3s",
+  minHeight: `calc(100vh - ${HEADER_HEIGHT}px)`,
+  padding: 20,
+  overflowY: "auto",
+});
 
 function App() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activePage, setActivePage] = useState("videos");
-  const [activeVideo, setActiveVideo] = useState(null);
-  const [showLogin, setShowLogin] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 780);
+  const [collapsed, setCollapsed] = useState(true); // icon only visible collapsed by default on mobile
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 780);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
+    setMobileOpen(false);
+    if (isMobile) setCollapsed(true);
+    else setCollapsed(false);
+  }, [isMobile]);
+
+  const handleToggle = () => {
+    if (isMobile) {
+      if (mobileOpen) {
+        setMobileOpen(false);
+        setCollapsed(true);
+      } else {
+        setMobileOpen(true);
+        setCollapsed(false);
+      }
+    } else {
+      setCollapsed(!collapsed);
+    }
+  };
+
+  const sidebarWidth = isMobile
+    ? collapsed
+      ? sidebarCollapsedWidth // icon only visible on mobile always
+      : sidebarExpandedWidth // overlay overlay on mobile open
+    : collapsed
+    ? sidebarCollapsedWidth
+    : sidebarExpandedWidth;
 
   return (
     <>
-      <Header
-        onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
-        onLoginClick={() => setShowLogin(true)}
-      />
-
-      <div className="d-flex" style={{ height: "90vh" }}>
+      <Header onToggleSidebar={handleToggle} />
+      <div style={layoutStyle}>
         <Sidebar
-          collapsed={sidebarCollapsed}
-          activePage={activePage}
-          onNavigate={setActivePage}
+          collapsed={collapsed}
+          mobileOpen={mobileOpen}
+          isMobile={isMobile}
+          activeIdx={activeIdx}
+          setActiveIdx={setActiveIdx}
+          setMobileOpen={setMobileOpen}
         />
-
-        {activePage === "videos" && (
-          <VideoGallery onVideoSelect={setActiveVideo} />
-        )}
-        {activePage === "documents" && <Documents />}
-        {activePage === "maps" && <Maps />}
-        {activePage === "gallery" && <Gallery />}
-        {activePage === "reports" && <Reports />}
-        {activePage === "dashboard" && <Dashboard />}
-        {activePage === "farmers" && <Farmers />}
-        {activePage === "farmerscrop" && <FarmersCrop />}
+        <main style={mainStyle(sidebarWidth)}>
+          <Dashboard />
+        </main>
       </div>
-
-      <Footer />
-
-      {/* Video Modal */}
-      {activeVideo && (
-        <>
-          <div
-            className="modal fade show"
-            style={{ display: "block" }}
-            onClick={() => setActiveVideo(null)}
-          >
-            <div
-              className="modal-dialog modal-xl modal-fullscreen-sm-down modal-dialog-centered"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="modal-content modal-video bg-dark text-white">
-                <div className="modal-header border-0">
-                  <h5 className="modal-title">Video Preview</h5>
-                  <button
-                    type="button"
-                    className="btn-close btn-close-white"
-                    onClick={() => setActiveVideo(null)}
-                  ></button>
-                </div>
-                <div className="modal-body p-0">
-                  <iframe
-                    src={`https://www.youtube.com/embed/${activeVideo}?autoplay=1`}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="modal-backdrop fade show" />
-        </>
-      )}
-
-      {/* Login Modal */}
-      {showLogin && (
-        <>
-          <div
-            className="modal fade show"
-            style={{ display: "block" }}
-            onClick={() => setShowLogin(false)}
-          >
-            <div
-              className="modal-dialog modal-dialog-centered"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="modal-content border-0 shadow rounded-4 glassy-bg p-4">
-                <div className="modal-header border-0">
-                  <h5 className="modal-title w-100 text-center text-primary fw-bold">
-                    Welcome Back 👋
-                  </h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    onClick={() => setShowLogin(false)}
-                  ></button>
-                </div>
-                <div className="modal-body">
-                  <form
-                    autoComplete="off"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      setTimeout(() => setShowLogin(false), 300);
-                    }}
-                  >
-                    <div className="input-group mb-3">
-                      <span className="input-group-text">
-                        <i className="bi bi-person-fill" />
-                      </span>
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Username or Email"
-                        required
-                      />
-                    </div>
-                    <div className="input-group mb-3">
-                      <span className="input-group-text">
-                        <i className="bi bi-lock-fill" />
-                      </span>
-                      <input
-                        type="password"
-                        className="form-control"
-                        placeholder="Password"
-                        required
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      className="btn btn-primary w-100 rounded-pill"
-                    >
-                      Login
-                    </button>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="modal-backdrop fade show" />
-        </>
-      )}
     </>
   );
 }
