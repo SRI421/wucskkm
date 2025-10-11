@@ -13,7 +13,6 @@ import {
 
 import {
   getCarouselImages,
-  getMapImage,
   getPieChartData,
   getBarChartData,
   getLineChartData,
@@ -25,103 +24,139 @@ ChartJS.register(
   CategoryScale,
   LinearScale,
   PointElement,
-  LineElement
+  LineElement,
 );
 
-const isBase64Image = (str) =>
-  typeof str === "string" && str.startsWith("data:image");
+const isBase64Image = (str) => typeof str === "string" && str.startsWith("data:image");
 
-const dashboardContainer = {
-  display: "flex",
-  flexDirection: "column",
-  height: "calc(100vh - 56px)",
-  minHeight: 420,
-  gap: 18,
-  padding: 14,
-};
-
-const firstRowStyle = {
-  display: "flex",
-  flex: 1,
-  gap: 18,
-  minHeight: 0,
-};
-
-const mapCardStyle = {
-  flexBasis: "33%",  // swapped to first position
-  borderRadius: 14,
-  boxShadow: "0 6px 18px rgba(30,43,82,0.09)",
-  background: "#fff",
-  minWidth: 200,
-  display: "flex",
-  flexDirection: "column",
-  overflow: "hidden",
-};
-
-const showcaseCardStyle = {
-  flexBasis: "67%",  // swapped to second position
-  borderRadius: 14,
-  boxShadow: "0 6px 18px rgba(30,43,82,0.09)",
-  background: "#fff",
-  minWidth: 200,
-  display: "flex",
-  flexDirection: "column",
-  overflow: "hidden",
-};
-
-const secondRowStyle = {
-  display: "flex",
-  flex: 1,
-  gap: 18,
-  minHeight: 0,
-};
-
-const chartCardStyle = {
-  flex: 1,
-  padding: 14,
-  borderRadius: 14,
-  boxShadow: "0 6px 18px rgba(30,43,82,0.09)",
-  background: "#fff",
-  minWidth: 170,
-  minHeight: 250,
-  alignItems: "center",
-  justifyContent: "center",
-  display: "flex",
-  flexDirection: "column",
-  overflow: "hidden",
-};
-
-const cardTitleStyle = {
-  fontSize: 17,
-  fontWeight: 600,
-  padding: "14px 18px 7px 18px",
-  color: "#244963",
-};
-
-const mediaQuery = `
+const styles = {
+  dashboardContainer: {
+    display: "flex",
+    flexDirection: "column",
+    height: "calc(100vh - 56px)",
+    minHeight: 420,
+    gap: 18,
+    padding: 14,
+    boxSizing: "border-box",
+    position: "relative",
+  },
+  firstRowStyle: {
+    position: "relative",
+    height: "50vh",
+    borderRadius: 14,
+    overflow: "hidden",
+    boxShadow: "0 6px 18px rgba(30,43,82,0.09)",
+    backgroundColor: "transparent",
+  },
+  carouselStyle: {
+    height: "100%",
+    width: "100%",
+    borderRadius: 14,
+  },
+  carouselItemStyle: {
+    height: "100%",
+  },
+  carouselImageStyle: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    borderRadius: 14,
+  },
+  overlayStyle: {
+    position: "absolute",
+    top: "20px",
+    left: 0,
+    right: 0,
+    color: "#244963",
+    textAlign: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.35)",
+    borderRadius: 14,
+    margin: "0 20px",
+    padding: "10px 0",
+    userSelect: "none",
+    pointerEvents: "none",
+  },
+  marqueeStyle: {
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    fontWeight: "600",
+    fontSize: 16,
+    animation: "marquee 15s linear infinite",
+    color: "#244963",
+    marginBottom: 8,
+    display: "block",
+  },
+  marqueeKeyframes: `
+@keyframes marquee {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+`,
+  headerStyle: {
+    fontWeight: 600,
+    fontSize: 18,
+    margin: "0 0 10px 0",
+  },
+  secondRowStyle: {
+    display: "flex",
+    flex: 1,
+    gap: 18,
+    minHeight: 0,
+  },
+  chartCardStyle: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 14,
+    boxShadow: "0 6px 18px rgba(30,43,82,0.09)",
+    background: "#fff",
+    minWidth: 170,
+    minHeight: 250,
+    alignItems: "center",
+    justifyContent: "center",
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
+  },
+  cardTitleStyle: {
+    fontSize: 17,
+    fontWeight: 600,
+    padding: "14px 18px 7px 18px",
+    color: "#244963",
+    userSelect: "none",
+  },
+  mediaQuery: `
 @media (max-width: 900px) {
-  .dashboard-container { height: auto !important; }
-  .dashboard-row { flex-direction: column !important; }
-  .dashboard-card { width: 100% !important; min-width: unset !important; }
-  .first-row-showcase { flex-basis: 100% !important; margin-top: 12px; }
-  .first-row-map { flex-basis: 100% !important; }
-  .second-row-chart { flex-basis: 100% !important; margin-top: 12px; min-height: 180px !important;}
-  .second-row-chart > canvas {
-    height: 160px !important;
+  .firstRow {
+    height: 65vh !important;
+  }
+  .secondRow {
+    flex-direction: column !important;
+    height: auto !important;
+    margin-top: 24px !important;
+  }
+  .chartCard {
+    min-height: 220px !important;
+    width: 100% !important;
+    margin-bottom: 20px !important;
+  }
+  .marquee {
+    font-size: 16px !important;
+  }
+  .headerStyle {
+    font-size: 20px !important;
   }
 }
-`;
+`,
+};
 
-function Dashboard() {
+export default function Dashboard() {
   const [carouselImages, setCarouselImages] = useState(null);
-  const [mapImage, setMapImage] = useState(null);
   const [pieData, setPieData] = useState(null);
   const [barData, setBarData] = useState(null);
   const [lineData, setLineData] = useState(null);
 
   useEffect(() => {
     getCarouselImages().then(setCarouselImages);
-    getMapImage().then(setMapImage);
     getPieChartData().then(setPieData);
     getBarChartData().then(setBarData);
     getLineChartData().then(setLineData);
@@ -129,112 +164,77 @@ function Dashboard() {
 
   return (
     <>
-      <style>{mediaQuery}</style>
-      <div className="dashboard-container" style={dashboardContainer}>
-        {/* First Row */}
-        <div className="dashboard-row" style={firstRowStyle}>
+      <style>{styles.mediaQuery}</style>
+      <style>{styles.marqueeKeyframes}</style>
+      <div className="dashboard-container" style={styles.dashboardContainer}>
 
-          {/* Map Card first */}
-          <Card className="dashboard-card first-row-map" style={mapCardStyle}>
-            <div style={cardTitleStyle}>ನೀರು ಬಳಕೆದಾರರ ಸಹಕಾರ ಸಂಘ ನಿಯಮಿತ, ಕಾಗೆಕೋಡಮಗ್ಗೆ ,ಭದ್ರಾವತಿ</div>
-            <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
-              {!mapImage ? (
-                <div style={{ textAlign: "center", width: "100%" }}>
-                  <Spinner animation="border" variant="primary" />
-                </div>
-              ) : (
-                <img
-                  src={isBase64Image(mapImage) ? mapImage : mapImage}
-                  alt="Society Map"
-                  style={{
-                    width: "100%",
-                    objectFit: "cover",
-                    height: "26vw",
-                    minHeight: 160,
-                    maxHeight: 300,
-                    borderRadius: 8,
-                    display: "block",
-                    margin: "0 auto",
-                  }}
-                />
-              )}
-            </div>
-          </Card>
+        {/* First Row: Background carousel with transparent overlay */}
+        <div className="firstRow" style={styles.firstRowStyle}>
+          <Carousel
+            variant="dark"
+            controls={false}
+            indicators={false}
+            interval={3500}
+            style={styles.carouselStyle}
+            pause={false}
+          >
+            {carouselImages ? (
+              carouselImages.map((img, index) => (
+                <Carousel.Item key={index} style={styles.carouselItemStyle}>
+                  <img
+                    src={isBase64Image(img) ? img : img}
+                    alt={`Showcase ${index + 1}`}
+                    style={styles.carouselImageStyle}
+                  />
+                </Carousel.Item>
+              ))
+            ) : (
+              <div style={{ height: "50vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                <Spinner animation="border" />
+              </div>
+            )}
+          </Carousel>
 
-          {/* Showcase Images second with marquee header */}
-          <Card className="dashboard-card first-row-showcase" style={showcaseCardStyle}>
-            <div style={{ ...cardTitleStyle, whiteSpace: "nowrap", overflow: "hidden" }}>
-              <marquee behavior="scroll" direction="left" scrollamount="5" style={{ color: "#244963" }}>
-                ನೀರು ಬಳಕೆದಾರರ ಸಹಕಾರ ಸಂಘ ನಿಯಮಿತ, ಕಾಗೆಕೋಡಮಗ್ಗೆ ,ಭದ್ರಾವತಿ
-              </marquee>
-            </div>
-            <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-              {!carouselImages ? (
-                <div style={{ textAlign: "center", paddingTop: 60 }}>
-                  <Spinner animation="border" variant="primary" />
-                </div>
-              ) : (
-                <Carousel style={{ flex: 1, minHeight: 0, height: "100%" }} interval={3500}>
-                  {carouselImages.map((img, idx) => (
-                    <Carousel.Item key={idx} style={{ height: "100%" }}>
-                      <img
-                        src={isBase64Image(img) ? img : img}
-                        alt={`Showcase ${idx + 1}`}
-                        style={{
-                          width: "100%",
-                          objectFit: "cover",
-                          height: "26vw",
-                          minHeight: 160,
-                          maxHeight: 300,
-                          borderRadius: 8,
-                          display: "block",
-                          margin: "0 auto",
-                        }}
-                      />
-                    </Carousel.Item>
-                  ))}
-                </Carousel>
-              )}
-            </div>
-          </Card>
+          {/* Overlay marquee and header*/}
+          <div style={styles.overlayStyle} aria-hidden="true">
+            <span style={styles.marqueeStyle} className="marquee">
+              ನೀರು ಬಳಕೆದಾರರ ಸಹಕಾರ ಸಂಘ ನಿಯಮಿತ, ಕಾಗೆಕೋಡಮ ಜೊತೆ, ಭದ್ರಾವತಿ
+            </span>
+            <h2 style={styles.headerStyle}>ನೀರು ಬಳಕೆದಾರರ ಸಹಕಾರ ಸಂಘ ನಿರ್ವಾಹಕರು</h2>
+          </div>
         </div>
 
-        {/* Second Row */}
-        <div className="dashboard-row" style={secondRowStyle}>
-          <Card className="dashboard-card second-row-chart" style={chartCardStyle}>
-            <div style={cardTitleStyle}>Crop Distribution</div>
+        {/* Second Row: Cards with charts */}
+        <div className="secondRow" style={styles.secondRowStyle}>
+          <Card style={styles.chartCardStyle}>
+            <div style={styles.cardTitleStyle}>Crop Distribution</div>
             {pieData ? (
-              <Pie data={pieData} options={{ maintainAspectRatio: false }} />
+              <Pie data={pieData} options={{ maintainAspectRatio: false }} style={{ width: "100%", flex: 1 }} />
             ) : (
-              <div style={{ textAlign: "center", paddingTop: 40 }}>
-                <Spinner animation="border" variant="primary" />
-              </div>
+              <Spinner animation="border" variant="primary" />
             )}
           </Card>
-          <Card className="dashboard-card second-row-chart" style={chartCardStyle}>
-            <div style={cardTitleStyle}>Monthly Yield</div>
+
+          <Card style={styles.chartCardStyle}>
+            <div style={styles.cardTitleStyle}>Monthly Yield</div>
             {barData ? (
-              <Bar data={barData} options={{ maintainAspectRatio: false }} />
+              <Bar data={barData} options={{ maintainAspectRatio: false }} style={{ width: "100%", flex: 1 }} />
             ) : (
-              <div style={{ textAlign: "center", paddingTop: 40 }}>
-                <Spinner animation="border" variant="primary" />
-              </div>
+              <Spinner animation="border" variant="primary" />
             )}
           </Card>
-          <Card className="dashboard-card second-row-chart" style={chartCardStyle}>
-            <div style={cardTitleStyle}>Annual Growth Trend</div>
+
+          <Card style={styles.chartCardStyle}>
+            <div style={styles.cardTitleStyle}>Annual Growth Trend</div>
             {lineData ? (
-              <Line data={lineData} options={{ maintainAspectRatio: false }} />
+              <Line data={lineData} options={{ maintainAspectRatio: false }} style={{ width: "100%", flex: 1 }} />
             ) : (
-              <div style={{ textAlign: "center", paddingTop: 40 }}>
-                <Spinner animation="border" variant="primary" />
-              </div>
+              <Spinner animation="border" variant="primary" />
             )}
           </Card>
         </div>
+
       </div>
     </>
   );
 }
-
-export default Dashboard;

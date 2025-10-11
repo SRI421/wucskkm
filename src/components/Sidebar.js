@@ -1,3 +1,4 @@
+// Sidebar.js
 import React from "react";
 import {
   FaTachometerAlt,
@@ -10,7 +11,7 @@ import {
 } from "react-icons/fa";
 import { HEADER_HEIGHT } from "./Header";
 
-const MENUS = [
+export const MENUS = [
   { icon: <FaTachometerAlt />, text: "Dashboard" },
   { icon: <FaLandmark />, text: "Society-Info" },
   { icon: <FaImages />, text: "Gallery" },
@@ -75,7 +76,6 @@ const Sidebar = ({
       ? sidebarCollapsedWidth
       : sidebarExpandedWidth;
 
-  // Sidebar style: fixed position, with overlay styles on mobile open
   const sidebarStyleDynamic = {
     ...sidebarBase,
     width,
@@ -103,7 +103,7 @@ const Sidebar = ({
               style={navItemStyle(idx === activeIdx, collapsed)}
               onClick={() => {
                 setActiveIdx(idx);
-                if (isMobile && mobileOpen) setMobileOpen(false); // close overlay on selection
+                if (isMobile && mobileOpen) setMobileOpen(false);
               }}
               title={collapsed ? menu.text : ""}
             >

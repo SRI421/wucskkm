@@ -1,7 +1,9 @@
+// App.js
 import React, { useState, useEffect } from "react";
 import Header, { HEADER_HEIGHT } from "./components/Header";
-import Sidebar, { sidebarCollapsedWidth, sidebarExpandedWidth } from "./components/Sidebar";
+import Sidebar, { sidebarCollapsedWidth, sidebarExpandedWidth, MENUS } from "./components/Sidebar";
 import Dashboard from "./components/Dashboard";
+import DataTablePage from "./components/DataTablePage";
 
 const layoutStyle = {
   display: "flex",
@@ -22,7 +24,7 @@ const mainStyle = (sidebarWidth) => ({
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 780);
-  const [collapsed, setCollapsed] = useState(true); // icon only visible collapsed by default on mobile
+  const [collapsed, setCollapsed] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
 
@@ -54,11 +56,22 @@ function App() {
 
   const sidebarWidth = isMobile
     ? collapsed
-      ? sidebarCollapsedWidth // icon only visible on mobile always
-      : sidebarExpandedWidth // overlay overlay on mobile open
+      ? sidebarCollapsedWidth
+      : sidebarExpandedWidth
     : collapsed
     ? sidebarCollapsedWidth
     : sidebarExpandedWidth;
+
+  const renderContent = () => {
+    switch (activeIdx) {
+      case 0:
+        return <Dashboard />;
+      case MENUS.length - 1: // Farmers-details
+        return <DataTablePage sidebarCollapsed={collapsed} sidebarWidth={sidebarWidth} />;
+      default:
+        return <div style={{ padding: 20 }}>Feature "{MENUS[activeIdx]?.text}" coming soon.</div>;
+    }
+  };
 
   return (
     <>
@@ -72,9 +85,7 @@ function App() {
           setActiveIdx={setActiveIdx}
           setMobileOpen={setMobileOpen}
         />
-        <main style={mainStyle(sidebarWidth)}>
-          <Dashboard />
-        </main>
+        <main style={mainStyle(sidebarWidth)}>{renderContent()}</main>
       </div>
     </>
   );
